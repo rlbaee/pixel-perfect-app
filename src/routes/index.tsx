@@ -240,7 +240,7 @@ function Dashboard() {
                   >
                     <div
                       className={`grid size-11 place-items-center rounded-xl text-xl ${
-                        accentTile[habit.accent] ?? accentTile.brand
+                        accentTile[habit.accent] ?? accentTile['brand']
                       }`}
                     >
                       {habit.emoji}
@@ -257,8 +257,8 @@ function Dashboard() {
                               key={d}
                               className={`size-1.5 rounded-full ${
                                 on
-                                  ? (accentDot[habit.accent] ?? accentDot.brand)
-                                  : (accentDotSoft[habit.accent] ?? accentDotSoft.brand)
+                                  ? (accentDot[habit.accent] ?? accentDot['brand'])
+                                  : (accentDotSoft[habit.accent] ?? accentDotSoft['brand'])
                               }`}
                             />
                           );
