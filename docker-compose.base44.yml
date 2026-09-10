@@ -1,0 +1,31 @@
+services:
+  web:
+    image: node:22-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    # Install deps (fast if already present) then start the Vite dev server.
+    # --host 0.0.0.0 binds to all interfaces so the preview proxy can reach it.
+    # --port 3000 / --strictPort ensure the user-facing entry point is on 3000.
+    command: sh -c "npm install && npx vite dev --host 0.0.0.0 --port 3000 --strictPort"
+    ports:
+      - "3000:3000"
+    environment:
+      # Platform sets this; Vite >= 6.1 appends it to allowedHosts so the
+      # preview's external hostname is accepted by the dev server.
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
+    env_file:
+      - .env
+      - /run/base44/app.env
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
