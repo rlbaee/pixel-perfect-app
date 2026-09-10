@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      habit_checks: {
+        Row: {
+          created_at: string
+          day: string
+          habit_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          habit_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          habit_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_checks_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          accent: string
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          accent?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          accent?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
