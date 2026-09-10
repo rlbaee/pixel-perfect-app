@@ -14,7 +14,7 @@
 ## Stack
 - **Framework**: TanStack Start (SSR) + Vite 8 + React 19 + TypeScript
 - **Package manager**: Bun (bun.lock), but the Base44 compose uses npm (node:22-slim)
-- **Backend**: Supabase (remote — credentials in `.env`, publishable keys only)
+- **Backend**: Firebase Firestore (database) + Supabase (auth middleware, not used in main flow)
 - **Styling**: Tailwind CSS 4 + shadcn/ui (new-york style)
 
 ## Running

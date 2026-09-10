@@ -1,4 +1,16 @@
-import { supabase } from "@/integrations/supabase/client";
+import {
+  collection,
+  query,
+  orderBy,
+  where,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  setDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { getDb } from "@/integrations/firebase/client";
 
 export type Note = {
   id: string;
@@ -32,55 +44,67 @@ export function dayKey(offset = 0) {
 export const lastFiveDays = () => [4, 3, 2, 1, 0].map((o) => dayKey(o));
 
 export async function fetchNotes(): Promise<Note[]> {
-  const { data, error } = await supabase
-    .from("notes")
-    .select("id, category, content, created_at")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
+  const db = getDb();
+  const q = query(collection(db, "notes"), orderBy("created_at", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({
+    id: d.id,
+    category: d.data().category as string,
+    content: d.data().content as string,
+    created_at:
+      (d.data().created_at as { toDate?: () => Date } | undefined)?.toDate()?.toISOString() ??
+      new Date().toISOString(),
+  }));
 }
 
 export async function addNote(input: { category: string; content: string }) {
-  const { error } = await supabase.from("notes").insert(input);
-  if (error) throw error;
+  const db = getDb();
+  await addDoc(collection(db, "notes"), {
+    category: input.category,
+    content: input.content,
+    created_at: serverTimestamp(),
+  });
 }
 
 export async function deleteNote(id: string) {
-  const { error } = await supabase.from("notes").delete().eq("id", id);
-  if (error) throw error;
+  const db = getDb();
+  await deleteDoc(doc(db, "notes", id));
 }
 
 export async function fetchHabits(): Promise<Habit[]> {
-  const { data, error } = await supabase
-    .from("habits")
-    .select("id, name, emoji, accent, position")
-    .order("position", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
+  const db = getDb();
+  const q = query(collection(db, "habits"), orderBy("position", "asc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({
+    id: d.id,
+    name: d.data().name as string,
+    emoji: d.data().emoji as string,
+    accent: d.data().accent as string,
+    position: d.data().position as number,
+  }));
 }
 
 export async function fetchChecks(): Promise<HabitCheck[]> {
-  const { data, error } = await supabase
-    .from("habit_checks")
-    .select("id, habit_id, day")
-    .gte("day", dayKey(60));
-  if (error) throw error;
-  return data ?? [];
+  const db = getDb();
+  const q = query(collection(db, "habit_checks"), where("day", ">=", dayKey(60)));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({
+    id: d.id,
+    habit_id: d.data().habit_id as string,
+    day: d.data().day as string,
+  }));
 }
 
 export async function toggleCheck(habitId: string, checked: boolean) {
+  const db = getDb();
+  const checkId = `${habitId}_${dayKey(0)}`;
   if (checked) {
-    const { error } = await supabase
-      .from("habit_checks")
-      .delete()
-      .eq("habit_id", habitId)
-      .eq("day", dayKey(0));
-    if (error) throw error;
+    await deleteDoc(doc(db, "habit_checks", checkId));
   } else {
-    const { error } = await supabase
-      .from("habit_checks")
-      .insert({ habit_id: habitId, day: dayKey(0) });
-    if (error) throw error;
+    await setDoc(doc(db, "habit_checks", checkId), {
+      habit_id: habitId,
+      day: dayKey(0),
+    });
   }
 }
 

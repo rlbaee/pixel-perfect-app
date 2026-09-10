@@ -16,6 +16,7 @@ services:
       - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
     env_file:
       - .env
+      - /run/base44/app.env
     healthcheck:
       test:
         [
